@@ -1,0 +1,36 @@
+apply plugin: 'checkstyle'
+apply plugin: "com.github.spotbugs"
+apply plugin: 'pmd'
+apply plugin: "org.sonarqube"
+apply plugin: 'jacoco'
+
+
+def configDirectory = "${rootDir}/build-support/config"
+
+checkstyle {
+    ignoreFailures = false
+    toolVersion = '8.35'
+    configDir = file("${configDirectory}")
+}
+
+checkstyleMain {
+    configFile = file("${configDirectory}/checkstyle/checkstyle.xml")
+}
+
+checkstyleTest {
+    configFile = file("${configDirectory}/checkstyle/test-checkstyle.xml")
+}
+
+pmd {
+    toolVersion = '6.17.0'
+    ruleSets = [] // Gradle 5+ adds the 'errorprone' ruleset by default, so we need to remove it
+    ruleSetFiles = files("${configDirectory}/pmd/pmd.xml")
+}
+
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+    }
+}

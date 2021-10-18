@@ -1,0 +1,11 @@
+.gradle
+.idea
+build
+out
+*.iml
+*.retry
+bin
+.project
+.classpath
+.settings
+es_node_data
