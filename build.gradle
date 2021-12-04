@@ -30,6 +30,19 @@ apply plugin: 'idea'
 sourceCompatibility = 1.11
 targetCompatibility = 1.11
 
+compileKotlin {
+    kotlinOptions {
+        freeCompilerArgs = ['-Xjsr305=strict', "-Xallow-result-return-type"]
+        jvmTarget = '11'
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        freeCompilerArgs = ['-Xjsr305=strict']
+        jvmTarget = '11'
+    }
+}
 
 compileJava {
     options.encoding = 'UTF-8'
