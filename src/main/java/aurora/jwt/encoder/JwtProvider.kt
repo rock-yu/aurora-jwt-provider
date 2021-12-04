@@ -73,7 +73,7 @@ class JwtProvider @JvmOverloads constructor(
     private fun signToken(claimsSet: JWTClaimsSet): SignedJWT {
         val signedJWT = SignedJWT(JWSHeader(JWSAlgorithm.HS256), claimsSet)
         try {
-            val signer: JWSSigner = MACSigner(signerKeyProvider.key)
+            val signer: JWSSigner = MACSigner(signerKeyProvider.getKey())
             signedJWT.sign(signer)
         } catch (e: JOSEException) {
             throw SignTokenFailureException(e)

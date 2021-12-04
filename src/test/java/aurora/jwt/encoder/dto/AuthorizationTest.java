@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class AuthorizationTest {
 
     @Test
     public void testToJsonDtoWithEmptyAssets() {
-        Authorization emptyAuthorization = new Authorization(null, null);
+        Authorization emptyAuthorization = new Authorization(Collections.emptyList(), Collections.emptyMap());
 
         AuthorizationJsonDto jsonDto = new AuthorizationJsonDtoFactory(new BitmaskEncoderStub()).create(emptyAuthorization);
         assertEquals("", jsonDto.getOrganization());
