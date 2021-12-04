@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import aurora.jwt.common.dto.Identity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import aurora.jwt.common.dto.Authorization;
-import aurora.jwt.common.dto.Identity;
 import aurora.jwt.common.dto.Preferences;
 import aurora.jwt.common.dto.SecurityContext;
 import aurora.jwt.decoder.exception.JwtVerificationException;
