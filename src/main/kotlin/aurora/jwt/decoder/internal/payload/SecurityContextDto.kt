@@ -27,8 +27,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
  * }
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-class SecurityContextDto {
-    var identity: IdentityDto? = null
-    var preferences: PreferencesDto? = null
+data class SecurityContextDto(
+    var identity: IdentityDto? = null,
+    var preferences: PreferencesDto? = null,
     var authorization: AuthorizationDto? = null
-}
+)

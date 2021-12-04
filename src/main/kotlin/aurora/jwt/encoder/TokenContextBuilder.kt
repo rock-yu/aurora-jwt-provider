@@ -4,8 +4,6 @@ import aurora.jwt.common.dto.Authorization
 import aurora.jwt.common.dto.Identity
 import aurora.jwt.common.dto.Preferences
 import aurora.jwt.common.dto.SecurityContext
-import aurora.jwt.common.util.CollectionUtils
-import aurora.jwt.common.util.ValidationUtils
 
 class TokenContextBuilder(userId: String?, organizationId: String?) {
     private val userId: String
@@ -13,8 +11,8 @@ class TokenContextBuilder(userId: String?, organizationId: String?) {
     private var locale: String? = null
     private var timezone: String? = null
     private var fileEncoding: String? = null
-    private var organizationAssets: List<Int>? = null
-    private var projectAssets: Map<String, List<Int>>? = null
+    private var organizationAssets: List<Int> = emptyList()
+    private var projectAssets: Map<String, List<Int>> = emptyMap()
     fun withLocale(locale: String?): TokenContextBuilder {
         this.locale = locale
         return this
@@ -30,12 +28,12 @@ class TokenContextBuilder(userId: String?, organizationId: String?) {
         return this
     }
 
-    fun withOrganizationAssets(organizationAssets: List<Int>?): TokenContextBuilder {
+    fun withOrganizationAssets(organizationAssets: List<Int>): TokenContextBuilder {
         this.organizationAssets = organizationAssets
         return this
     }
 
-    fun withProjectAssets(projectAssets: Map<String, List<Int>>?): TokenContextBuilder {
+    fun withProjectAssets(projectAssets: Map<String, List<Int>>): TokenContextBuilder {
         this.projectAssets = projectAssets
         return this
     }
@@ -45,14 +43,14 @@ class TokenContextBuilder(userId: String?, organizationId: String?) {
             Identity(userId, organizationId),
             Preferences(locale, timezone, fileEncoding),
             Authorization(
-                CollectionUtils.nullSafeList(organizationAssets),
-                CollectionUtils.nullSafeMap(projectAssets)
+                organizationAssets,
+                projectAssets
             )
         )
     }
 
     init {
-        this.userId = ValidationUtils.notNullOrEmpty(userId, "'userId' is required")
-        this.organizationId = ValidationUtils.notNullOrEmpty(organizationId, "'organizationId' is required")
+        this.userId = requireNotNull(userId) { "'userId' is required" }
+        this.organizationId = requireNotNull(organizationId) { "'organizationId' is required" }
     }
 }

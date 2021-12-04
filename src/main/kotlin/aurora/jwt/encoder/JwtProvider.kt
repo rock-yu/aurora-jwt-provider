@@ -1,8 +1,9 @@
 package aurora.jwt.encoder
 
 import aurora.jwt.common.dto.Identity
-import aurora.jwt.common.dto.SecurityContext
+import aurora.jwt.common.dto.Preferences
 import aurora.jwt.common.util.Base36BitmaskEncoder
+import aurora.jwt.encoder.dto.AuthorizationJsonDto
 import aurora.jwt.encoder.dto.AuthorizationJsonDtoFactory
 import aurora.jwt.encoder.exception.SignTokenFailureException
 import com.nimbusds.jose.JOSEException
@@ -52,19 +53,8 @@ class JwtProvider @JvmOverloads constructor(
         val claimsSet = JWTClaimsSet.Builder()
             .claim("version", JWT_CONTRACT_VERSION)
             .claim("identity", securityContext.identity.toJavaBean())
-            .claim("preferences", securityContext.preferences)
-            .claim("authorization", authorizationJsonDtoFactory.create(securityContext.authorization))
-            .expirationTime(getExpirationAsDate(expirationTimeInSeconds))
-            .build()
-        return signToken(claimsSet).serialize()
-    }
-
-    fun generateJwtToken(securityContext: SecurityContext, expirationTimeInSeconds: Int): String {
-        val claimsSet = JWTClaimsSet.Builder()
-            .claim("version", JWT_CONTRACT_VERSION)
-            .claim("identity", securityContext.identity.toJavaBean())
-            .claim("preferences", securityContext.preferences)
-            .claim("authorization", authorizationJsonDtoFactory.create(securityContext.authorization))
+            .claim("preferences", securityContext.preferences.toJavaBean())
+            .claim("authorization", authorizationJsonDtoFactory.create(securityContext.authorization).toJavaBean())
             .expirationTime(getExpirationAsDate(expirationTimeInSeconds))
             .build()
         return signToken(claimsSet).serialize()
@@ -93,4 +83,9 @@ class JwtProvider @JvmOverloads constructor(
 
 // nimbusds serializer require the claim object to be in JavaBean convention (contain both setter/getter)
 private fun Identity.toJavaBean() = IdentityBean(userId, organizationId)
+private fun Preferences.toJavaBean() = PreferencesBean(locale, timezone, fileEncoding)
+private fun AuthorizationJsonDto.toJavaBean() = AuthorizationJsonBean(organization, projects)
+
 private data class IdentityBean(var userId: String, var organizationId: String)
+private data class PreferencesBean(var locale: String?, var timezone: String?, var fileEncoding: String?)
+private data class AuthorizationJsonBean(var organization: String, var projects: Map<String, String>)

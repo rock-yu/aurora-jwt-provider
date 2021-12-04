@@ -14,7 +14,7 @@ import java.io.IOException
 import java.text.ParseException
 import java.time.Instant
 
-class JwtDecoder protected constructor(
+class JwtDecoder private constructor(
     verificationKeyProvider: VerificationKeyProvider,
     objectMapper: ObjectMapper,
     securityContextConverter: SecurityContextConverter
@@ -52,15 +52,13 @@ class JwtDecoder protected constructor(
         return false
     }
 
-    private fun verify(signedJWT: SignedJWT, secretKey: String): Boolean {
-        return try {
-            val verifier: JWSVerifier = MACVerifier(secretKey)
-            signedJWT.verify(verifier) && verifyDate(signedJWT)
-        } catch (e: JOSEException) {
-            throw JwtVerificationException("JWT signature verification failed", e)
-        } catch (e: ParseException) {
-            throw JwtVerificationException("JWT signature verification failed", e)
-        }
+    private fun verify(signedJWT: SignedJWT, secretKey: String): Boolean = try {
+        val verifier: JWSVerifier = MACVerifier(secretKey)
+        signedJWT.verify(verifier) && verifyDate(signedJWT)
+    } catch (e: JOSEException) {
+        throw JwtVerificationException("JWT signature verification failed", e)
+    } catch (e: ParseException) {
+        throw JwtVerificationException("JWT signature verification failed", e)
     }
 
     @Throws(ParseException::class)
@@ -74,6 +72,6 @@ class JwtDecoder protected constructor(
 
     init {
         this.verificationKeyProvider = verificationKeyProvider
-        jwtPayloadParser = JwtPayloadParser(objectMapper, securityContextConverter)
+        this.jwtPayloadParser = JwtPayloadParser(objectMapper, securityContextConverter)
     }
 }
