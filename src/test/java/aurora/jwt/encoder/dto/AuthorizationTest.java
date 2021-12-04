@@ -1,6 +1,6 @@
 package aurora.jwt.encoder.dto;
 
-import static aurora.jwt.encoder.JwtProviderKt.toAuthorizationJsonDto;
+import static aurora.jwt.encoder.JwtProviderKt.encodeProjectAssets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import aurora.jwt.common.dto.Authorization;
-import aurora.jwt.encoder.AuthorizationJsonDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -49,10 +48,8 @@ public class AuthorizationTest {
 
     @Test
     public void testToJsonDtoWithBase36EncodedBitmask() {
-        AuthorizationJsonDto jsonDto = toAuthorizationJsonDto(authorization, numbers -> stubEncodeFunc(numbers));
-        assertEquals("71", jsonDto.getOrganization());
-
-        Map<String, String> projects = jsonDto.getProjects();
+        assertEquals("71", stubEncodeFunc(authorization.getOrganizationAssets()));
+        Map<String, String> projects = encodeProjectAssets(authorization.getProjectAssets(), numbers -> stubEncodeFunc(numbers));
         assertEquals(2, projects.size());
         assertEquals("94", projects.get(project1Id + ""));
         assertEquals("94,99", projects.get(project2Id + ""));
@@ -60,12 +57,9 @@ public class AuthorizationTest {
 
     @Test
     public void testToJsonDtoWithEmptyAssets() {
-        Authorization emptyAuthorization = new Authorization(Collections.emptyList(), Collections.emptyMap());
+        assertEquals("", stubEncodeFunc(Collections.emptyList()));
 
-        AuthorizationJsonDto jsonDto = toAuthorizationJsonDto(emptyAuthorization, numbers -> stubEncodeFunc(numbers));
-        assertEquals("", jsonDto.getOrganization());
-
-        Map<String, String> projects = jsonDto.getProjects();
+        Map<String, String> projects = encodeProjectAssets(Collections.emptyMap(), numbers -> stubEncodeFunc(numbers));
         assertEquals(0, projects.size());
     }
 

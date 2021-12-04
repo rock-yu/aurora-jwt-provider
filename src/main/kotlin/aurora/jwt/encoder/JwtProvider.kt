@@ -52,7 +52,7 @@ class JwtProvider @JvmOverloads constructor(
             .claim("version", JWT_CONTRACT_VERSION)
             .claim("identity", securityContext.identity.toJavaBean())
             .claim("preferences", securityContext.preferences.toJavaBean())
-            .claim("authorization", securityContext.authorization.toAuthorizationJsonDto(encode).toJavaBean())
+            .claim("authorization", securityContext.authorization.encodedWith(encode).toJavaBean())
             .expirationTime(expirationTime)
             .build()
         return claimsSet.signToken(signerKey::getKey).serialize()
@@ -79,15 +79,21 @@ fun JWTClaimsSet.signToken(signerKey: () -> String): SignedJWT = try {
 class SignTokenFailureException(cause: Throwable) :
     RuntimeException("Unexpected error occurred when signing token", cause)
 
-// nimbusds serializer require the claim object to be in JavaBean convention (contain both setter/getter)
-fun Authorization.toAuthorizationJsonDto(encode: (List<Int>) -> String) = AuthorizationJsonDto(
-    organization = encode(organizationAssets),
-    projects = projectAssets.map { (projectId, assets) -> projectId to encode(assets) }.toMap()
-)
+fun encodeProjectAssets(
+    projectAssets: Map<String, List<Int>>,
+    encode: (List<Int>) -> String
+) = projectAssets.map { (projectId, assets) -> projectId to encode(assets) }.toMap()
 
+private fun Authorization.encodedWith(encode: (List<Int>) -> String) =
+    EncodedAuthorization(
+        encode(organizationAssets),
+        encodeProjectAssets(projectAssets, encode)
+    )
+
+// nimbusds serializer require the claim object to be in JavaBean convention (contain both setter/getter)
 private fun Identity.toJavaBean() = IdentityBean(userId, organizationId)
 private fun Preferences.toJavaBean() = PreferencesBean(locale, timezone, fileEncoding)
-private fun AuthorizationJsonDto.toJavaBean() = AuthorizationJsonBean(organization, projects)
+private fun EncodedAuthorization.toJavaBean() = AuthorizationJsonBean(organization, projects)
 
 /**
  * DTO representing authorization structure:
@@ -102,8 +108,7 @@ private fun AuthorizationJsonDto.toJavaBean() = AuthorizationJsonBean(organizati
  * }
  * </pre>
  */
-data class AuthorizationJsonDto(val organization: String, val projects: Map<String, String>)
-
+private data class EncodedAuthorization(val organization: String, val projects: Map<String, String>)
 private data class IdentityBean(var userId: String, var organizationId: String)
 private data class PreferencesBean(var locale: String?, var timezone: String?, var fileEncoding: String?)
 private data class AuthorizationJsonBean(var organization: String, var projects: Map<String, String>)
