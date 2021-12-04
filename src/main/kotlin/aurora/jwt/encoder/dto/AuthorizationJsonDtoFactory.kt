@@ -18,14 +18,14 @@ class AuthorizationJsonDtoFactory(private val bitmaskEncoder: Base36BitmaskEncod
         authorization: Authorization,
         bitmaskEncoder: Base36BitmaskEncoder
     ): String {
-        return bitmaskEncoder.encode(authorization.organizationAssets())
+        return bitmaskEncoder.encode(authorization.organizationAssets)
     }
 
     private fun encodedProjectWiseAssets(
         authorization: Authorization,
         bitmaskEncoder: Base36BitmaskEncoder
     ): Map<String, String> {
-        val aProjectAssets = authorization.projectAssets()
+        val aProjectAssets = authorization.projectAssets
         if (aProjectAssets.isEmpty()) {
             return emptyMap()
         }

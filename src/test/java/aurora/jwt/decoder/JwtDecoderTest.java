@@ -73,12 +73,12 @@ class JwtDecoderTest {
     private void ensureAuthorizationIsPresent(SecurityContext securityContext) {
         Authorization authorization = securityContext.getAuthorization();
 
-        assertEquals(Arrays.asList(146), authorization.organizationAssets());
+        assertEquals(Arrays.asList(146), authorization.getOrganizationAssets());
 
         Map<String, List<Integer>> expectedProjectAssets = new HashMap<>();
         expectedProjectAssets.put("503", Arrays.asList(85));
         expectedProjectAssets.put("1879048400", Arrays.asList(85));
         expectedProjectAssets.put("1879048401", Arrays.asList(85));
-        assertEquals(expectedProjectAssets, authorization.projectAssets());
+        assertEquals(expectedProjectAssets, authorization.getProjectAssets());
     }
 }
