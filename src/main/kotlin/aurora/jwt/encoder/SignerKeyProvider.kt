@@ -1,5 +1,5 @@
 package aurora.jwt.encoder
 
-interface SignerKeyProvider {
+fun interface SignerKeyProvider {
     fun getKey(): String
 }

@@ -2,25 +2,23 @@ package aurora.jwt.encoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import aurora.jwt.common.util.DateExtensionsKt;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.SignedJWT;
-import aurora.jwt.common.util.Base36BitmaskEncoder;
-import aurora.jwt.encoder.dto.AuthorizationJsonDtoFactory;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class JwtProviderTest {
@@ -36,23 +34,14 @@ public class JwtProviderTest {
 
     private TokenContextBuilder securityContext;
 
-    private static class BitmaskEncoderStub extends Base36BitmaskEncoder {
-        @Override
-        public String encode(List<Integer> numbers) {
-            return (numbers == null) ? "" : numbers.stream().map(number -> number.toString()).collect(Collectors.joining(","));
-        }
+    private static String stubEncodeFunc(List<Integer> numbers) {
+        return (numbers == null) ? "" : numbers.stream().map(number -> number.toString()).collect(Collectors.joining(","));
     }
-
-
-    @Mock
-    private SignerKeyProvider sharedSecrets;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        when(sharedSecrets.getKey()).thenReturn(SECRET);
-        this.testInstance = new JwtProvider(sharedSecrets, new AuthorizationJsonDtoFactory(new BitmaskEncoderStub()));
+        this.testInstance = new JwtProvider(() -> SECRET, numbers -> stubEncodeFunc(numbers));
 
         this.securityContext =
                 new TokenContextBuilder(USER_ID, ORGANIZATION_ID)
@@ -65,7 +54,7 @@ public class JwtProviderTest {
 
     @Test
     public void createToken() throws JOSEException, ParseException {
-        String jwtToken = this.testInstance.generateJwtToken(this.securityContext, EXPIRATION_TIME_IN_SECONDS);
+        String jwtToken = this.testInstance.generateJwt(this.securityContext, DateExtensionsKt.toDate(DateExtensionsKt.secondsLater(LocalDateTime.now(), EXPIRATION_TIME_IN_SECONDS)));
 
         JWSVerifier verifier = new MACVerifier(SECRET);
         SignedJWT signedJWT = SignedJWT.parse(jwtToken);

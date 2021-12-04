@@ -3,7 +3,7 @@ package aurora.jwt.common.util
 import java.math.BigInteger
 import java.util.BitSet
 
-open class Base36BitmaskEncoder {
+object Base36BitmaskEncoder {
     /**
      * Each Secured Asset could be represented as a Bit indicating whether the user is granted this Secured Asset or not.
      *
@@ -14,7 +14,7 @@ open class Base36BitmaskEncoder {
      * @param numbers numbers that prepresent bitmask
      * @return Base-36 encoded form of the number that represents the Bitmask, "0" will be returned if numbers is null or empty
      */
-    open fun encode(numbers: List<Int>): String {
+    fun encode(numbers: List<Int>): String {
         if (numbers.isEmpty()) {
             return BITMASK_ZERO
         }
@@ -31,8 +31,8 @@ open class Base36BitmaskEncoder {
         return BigInteger(binaryString.toString(), RADIX_2).toString(RADIX_36).toUpperCase()
     }
 
-    fun decode(base36EncodedFormOfNumbers: String?): List<Int> {
-        if (base36EncodedFormOfNumbers == null || base36EncodedFormOfNumbers.isEmpty() || BITMASK_ZERO == base36EncodedFormOfNumbers
+    fun decode(base36EncodedFormOfNumbers: String): List<Int> {
+        if (base36EncodedFormOfNumbers.isEmpty() || BITMASK_ZERO == base36EncodedFormOfNumbers
         ) {
             return emptyList()
         }
@@ -53,10 +53,8 @@ open class Base36BitmaskEncoder {
         return numbers
     }
 
-    companion object {
-        private const val RADIX_2 = 2
-        private const val RADIX_36 = 36
-        private const val BITMASK_ZERO = "0"
-        private const val BINARY_BIT_1 = '1'
-    }
+    private const val RADIX_2 = 2
+    private const val RADIX_36 = 36
+    private const val BITMASK_ZERO = "0"
+    private const val BINARY_BIT_1 = '1'
 }

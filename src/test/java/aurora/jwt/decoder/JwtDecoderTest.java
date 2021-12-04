@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import aurora.jwt.common.dto.Identity;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import aurora.jwt.common.dto.Authorization;
+import aurora.jwt.common.dto.Identity;
 import aurora.jwt.common.dto.Preferences;
 import aurora.jwt.common.dto.SecurityContext;
-import aurora.jwt.decoder.exception.JwtVerificationException;
+import aurora.jwt.common.util.Base36BitmaskEncoder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +24,10 @@ class JwtDecoderTest {
 
     @BeforeEach
     void setUp() {
-        this.jwtDecoder = new JwtDecoder(() -> Arrays.asList(KEY), new ObjectMapper());
+        this.jwtDecoder = new JwtDecoder(
+                () -> Arrays.asList(KEY),
+                new ObjectMapper(),
+                assetsEncoded -> Base36BitmaskEncoder.INSTANCE.decode(assetsEncoded));
     }
 
     @Test

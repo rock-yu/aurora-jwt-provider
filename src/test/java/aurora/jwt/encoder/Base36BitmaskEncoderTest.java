@@ -22,7 +22,7 @@ public class Base36BitmaskEncoderTest {
 
     @BeforeEach
     public void setUp() {
-        this.encoder = new Base36BitmaskEncoder();
+        this.encoder = Base36BitmaskEncoder.INSTANCE;
     }
 
     @Test

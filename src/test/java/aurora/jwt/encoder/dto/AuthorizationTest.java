@@ -1,5 +1,6 @@
 package aurora.jwt.encoder.dto;
 
+import static aurora.jwt.encoder.JwtProviderKt.toAuthorizationJsonDto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import aurora.jwt.common.util.Base36BitmaskEncoder;
 import aurora.jwt.common.dto.Authorization;
+import aurora.jwt.encoder.AuthorizationJsonDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,11 +35,8 @@ public class AuthorizationTest {
 
     private Authorization authorization;
 
-    private static class BitmaskEncoderStub extends Base36BitmaskEncoder {
-        @Override
-        public String encode(List<Integer> numbers) {
-            return (numbers == null) ? "" : numbers.stream().map(number -> number.toString()).collect(Collectors.joining(","));
-        }
+    private static String stubEncodeFunc(List<Integer> numbers) {
+        return (numbers == null) ? "" : numbers.stream().map(number -> number.toString()).collect(Collectors.joining(","));
     }
 
     @BeforeEach
@@ -51,7 +49,7 @@ public class AuthorizationTest {
 
     @Test
     public void testToJsonDtoWithBase36EncodedBitmask() {
-        AuthorizationJsonDto jsonDto = new AuthorizationJsonDtoFactory(new BitmaskEncoderStub()).create(authorization);
+        AuthorizationJsonDto jsonDto = toAuthorizationJsonDto(authorization, numbers -> stubEncodeFunc(numbers));
         assertEquals("71", jsonDto.getOrganization());
 
         Map<String, String> projects = jsonDto.getProjects();
@@ -64,7 +62,7 @@ public class AuthorizationTest {
     public void testToJsonDtoWithEmptyAssets() {
         Authorization emptyAuthorization = new Authorization(Collections.emptyList(), Collections.emptyMap());
 
-        AuthorizationJsonDto jsonDto = new AuthorizationJsonDtoFactory(new BitmaskEncoderStub()).create(emptyAuthorization);
+        AuthorizationJsonDto jsonDto = toAuthorizationJsonDto(emptyAuthorization, numbers -> stubEncodeFunc(numbers));
         assertEquals("", jsonDto.getOrganization());
 
         Map<String, String> projects = jsonDto.getProjects();
