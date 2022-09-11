@@ -19,11 +19,7 @@ pipeline {
                 sh "./gradlew clean build --no-build-cache"
             }
         }
-        stage("sonarqube scan") {
-            steps {
-                sh "echo 'skip sonarqube scan'"
-            }
-        }
+
         stage('Publish Library') {
             steps {
                 sh "./gradlew publish"

@@ -1,10 +1,6 @@
 apply plugin: 'checkstyle'
-// spotbugs generated too much noise for Kotlin
-//apply plugin: "com.github.spotbugs"
 apply plugin: 'pmd'
-apply plugin: "org.sonarqube"
 apply plugin: 'jacoco'
-
 
 def configDir = "${rootDir}/config"
 
