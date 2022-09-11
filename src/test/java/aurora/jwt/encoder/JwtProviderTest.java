@@ -32,7 +32,7 @@ public class JwtProviderTest {
     private static final int EXPIRATION_TIME_IN_SECONDS = 60;
     private static final String SECRET = "a658e59bc87c4bab8d585ddfaaa6894762d00de651614e8b987cf7a05389e23f";
 
-    private TokenContextBuilder securityContext;
+    private JwtTokenContextBuilder securityContext;
 
     private static String stubEncodeFunc(List<Integer> numbers) {
         return (numbers == null) ? "" : numbers.stream().map(number -> number.toString()).collect(Collectors.joining(","));
@@ -44,7 +44,7 @@ public class JwtProviderTest {
         this.testInstance = new JwtProvider(() -> SECRET, numbers -> stubEncodeFunc(numbers));
 
         this.securityContext =
-                new TokenContextBuilder(USER_ID, ORGANIZATION_ID)
+                new JwtTokenContextBuilder(USER_ID, ORGANIZATION_ID)
                         .withLocale("en_US")
                         .withTimezone("Australia/Sydney")
                         .withFileEncoding("utf-8")

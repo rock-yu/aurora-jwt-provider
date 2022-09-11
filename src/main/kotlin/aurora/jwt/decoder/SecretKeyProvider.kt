@@ -1,5 +1,5 @@
 package aurora.jwt.decoder
 
-fun interface VerificationKeyProvider {
+fun interface SecretKeyProvider {
     fun getKeys(): List<String>
 }

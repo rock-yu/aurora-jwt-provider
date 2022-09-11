@@ -44,10 +44,10 @@ class JwtProvider @JvmOverloads constructor(
 ) {
 
     fun generateJwt(
-        tokenContextBuilder: TokenContextBuilder,
+        jwtTokenContextBuilder: JwtTokenContextBuilder,
         expirationTime: Date,
     ): String {
-        val securityContext = tokenContextBuilder.build()
+        val securityContext = jwtTokenContextBuilder.build()
         val claimsSet = JWTClaimsSet.Builder()
             .claim("version", JWT_CONTRACT_VERSION)
             .claim("identity", securityContext.identity.toJavaBean())
@@ -59,7 +59,7 @@ class JwtProvider @JvmOverloads constructor(
     }
 
     fun generateJwt(
-        tokenContextBuilder: TokenContextBuilder,
+        tokenContextBuilder: JwtTokenContextBuilder,
         expirationTimeInSeconds: Int
     ): String = generateJwt(tokenContextBuilder, LocalDateTime.now().secondsLater(expirationTimeInSeconds).toDate())
 

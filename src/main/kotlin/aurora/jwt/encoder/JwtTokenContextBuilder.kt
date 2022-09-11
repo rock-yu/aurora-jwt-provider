@@ -5,7 +5,7 @@ import aurora.jwt.common.dto.Identity
 import aurora.jwt.common.dto.Preferences
 import aurora.jwt.common.dto.SecurityContext
 
-class TokenContextBuilder(
+class JwtTokenContextBuilder(
     private val userId: String,
     private val organizationId: String
 ) {

@@ -9,14 +9,14 @@ import java.io.IOException
 import java.text.ParseException
 
 class JwtDecoder @JvmOverloads constructor(
-    private val verificationKeys: VerificationKeyProvider,
+    private val secretKeyProvider: SecretKeyProvider,
     private val objectMapper: ObjectMapper,
     private val decode: (String) -> List<Int> = { Base36BitmaskEncoder.decode(it) }
 ) {
     fun decodeJwt(jwt: String?): SecurityContext {
         return try {
             val signedJWT = SignedJWT.parse(jwt)
-            if (!signedJWT.isVerifiedWith(verificationKeys::getKeys)) {
+            if (!signedJWT.isVerifiedWith(secretKeyProvider::getKeys)) {
                 throw JwtVerificationException("JWT signature verification failed")
             }
 
