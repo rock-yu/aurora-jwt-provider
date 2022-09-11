@@ -1,20 +1,20 @@
 package aurora.jwt.encoder.dto;
 
-import static aurora.jwt.encoder.JwtProviderKt.encodeProjectAssets;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import aurora.jwt.common.dto.Authorization;
+import aurora.jwt.encoder.EncodedAuthorization;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import aurora.jwt.common.dto.Authorization;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static aurora.jwt.encoder.JwtProviderKt.encodedWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AuthorizationTest {
 
@@ -49,18 +49,12 @@ public class AuthorizationTest {
     @Test
     public void testToJsonDtoWithBase36EncodedBitmask() {
         assertEquals("71", stubEncodeFunc(authorization.getOrganizationAssets()));
-        Map<String, String> projects = encodeProjectAssets(authorization.getProjectAssets(), numbers -> stubEncodeFunc(numbers));
+
+        EncodedAuthorization encodedAuthorization = encodedWith(authorization, numbers -> stubEncodeFunc(numbers));
+        Map<String, String> projects = encodedAuthorization.getProjects();
         assertEquals(2, projects.size());
         assertEquals("94", projects.get(project1Id + ""));
         assertEquals("94,99", projects.get(project2Id + ""));
-    }
-
-    @Test
-    public void testToJsonDtoWithEmptyAssets() {
-        assertEquals("", stubEncodeFunc(Collections.emptyList()));
-
-        Map<String, String> projects = encodeProjectAssets(Collections.emptyMap(), numbers -> stubEncodeFunc(numbers));
-        assertEquals(0, projects.size());
     }
 
     @Test

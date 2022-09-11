@@ -7,16 +7,17 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.nimbusds.jwt.SignedJWT
 import java.io.IOException
 import java.text.ParseException
+import java.time.Instant
 
 class JwtDecoder @JvmOverloads constructor(
     private val secretKeyProvider: SecretKeyProvider,
     private val objectMapper: ObjectMapper,
     private val decode: (String) -> List<Int> = { Base36BitmaskEncoder.decode(it) }
 ) {
-    fun decodeJwt(jwt: String?): SecurityContext {
+    fun decodeJwt(jwt: String?, systemTime: Instant = Instant.now()): SecurityContext {
         return try {
             val signedJWT = SignedJWT.parse(jwt)
-            if (!signedJWT.isVerifiedWith(secretKeyProvider::getKeys)) {
+            if (!signedJWT.isVerifiedWith(secretKeyProvider::getKeys, systemTime)) {
                 throw JwtVerificationException("JWT signature verification failed")
             }
 
@@ -33,4 +34,3 @@ class JwtVerificationException : RuntimeException {
     constructor(message: String, cause: Throwable) : super(message, cause)
     constructor(message: String) : super(message)
 }
-

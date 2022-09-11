@@ -6,12 +6,8 @@ import aurora.jwt.common.dto.Preferences
 import aurora.jwt.common.util.Base36BitmaskEncoder
 import aurora.jwt.common.util.secondsLater
 import aurora.jwt.common.util.toDate
-import com.nimbusds.jose.JOSEException
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
-import com.nimbusds.jose.crypto.MACSigner
+import aurora.jwt.decoder.signToken
 import com.nimbusds.jwt.JWTClaimsSet
-import com.nimbusds.jwt.SignedJWT
 import java.time.LocalDateTime
 import java.util.Date
 /**
@@ -40,7 +36,7 @@ import java.util.Date
  */
 class JwtProvider @JvmOverloads constructor(
     private val signerKey: SignerKeyProvider,
-    private val encode: (List<Int>) -> String = { Base36BitmaskEncoder.encode(it) }
+    private val assetsEncoder: (List<Int>) -> String = { Base36BitmaskEncoder.encode(it) }
 ) {
 
     fun generateJwt(
@@ -52,7 +48,7 @@ class JwtProvider @JvmOverloads constructor(
             .claim("version", JWT_CONTRACT_VERSION)
             .claim("identity", securityContext.identity.toJavaBean())
             .claim("preferences", securityContext.preferences.toJavaBean())
-            .claim("authorization", securityContext.authorization.encodedWith(encode).toJavaBean())
+            .claim("authorization", securityContext.authorization.encodedWith(assetsEncoder).toJavaBean())
             .expirationTime(expirationTime)
             .build()
         return claimsSet.signToken(signerKey::getKey).serialize()
@@ -67,28 +63,6 @@ class JwtProvider @JvmOverloads constructor(
         private const val JWT_CONTRACT_VERSION = 1L
     }
 }
-
-fun JWTClaimsSet.signToken(signerKey: () -> String): SignedJWT = try {
-    SignedJWT(JWSHeader(JWSAlgorithm.HS256), this).apply {
-        this.sign(MACSigner(signerKey()))
-    }
-} catch (e: JOSEException) {
-    throw SignTokenFailureException(e)
-}
-
-class SignTokenFailureException(cause: Throwable) :
-    RuntimeException("Unexpected error occurred when signing token", cause)
-
-fun encodeProjectAssets(
-    projectAssets: Map<String, List<Int>>,
-    encode: (List<Int>) -> String
-) = projectAssets.map { (projectId, assets) -> projectId to encode(assets) }.toMap()
-
-private fun Authorization.encodedWith(encode: (List<Int>) -> String) =
-    EncodedAuthorization(
-        encode(organizationAssets),
-        encodeProjectAssets(projectAssets, encode)
-    )
 
 // nimbusds serializer require the claim object to be in JavaBean convention (contain both setter/getter)
 private fun Identity.toJavaBean() = IdentityBean(userId, organizationId)
@@ -108,7 +82,18 @@ private fun EncodedAuthorization.toJavaBean() = AuthorizationJsonBean(organizati
  * }
  * </pre>
  */
-private data class EncodedAuthorization(val organization: String, val projects: Map<String, String>)
-private data class IdentityBean(var userId: String, var organizationId: String)
-private data class PreferencesBean(var locale: String?, var timezone: String?, var fileEncoding: String?)
-private data class AuthorizationJsonBean(var organization: String, var projects: Map<String, String>)
+data class EncodedAuthorization(val organization: String, val projects: Map<String, String>)
+data class IdentityBean(var userId: String, var organizationId: String)
+data class PreferencesBean(var locale: String?, var timezone: String?, var fileEncoding: String?)
+data class AuthorizationJsonBean(var organization: String, var projects: Map<String, String>)
+
+fun Authorization.encodedWith(encoder: (List<Int>) -> String) =
+    EncodedAuthorization(
+        encoder(organizationAssets),
+        encodeProjectAssets(projectAssets, encoder)
+    )
+
+private fun encodeProjectAssets(
+    projectAssets: Map<String, List<Int>>,
+    encoder: (List<Int>) -> String
+) = projectAssets.map { (projectId, assets) -> projectId to encoder(assets) }.toMap()
