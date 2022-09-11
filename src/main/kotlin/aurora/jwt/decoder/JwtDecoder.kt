@@ -4,12 +4,9 @@ import aurora.jwt.common.dto.SecurityContext
 import aurora.jwt.common.util.Base36BitmaskEncoder
 import aurora.jwt.decoder.internal.parseToSecurityContext
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.nimbusds.jose.JOSEException
-import com.nimbusds.jose.crypto.MACVerifier
 import com.nimbusds.jwt.SignedJWT
 import java.io.IOException
 import java.text.ParseException
-import java.time.Instant
 
 class JwtDecoder @JvmOverloads constructor(
     private val verificationKeys: VerificationKeyProvider,
@@ -37,22 +34,3 @@ class JwtVerificationException : RuntimeException {
     constructor(message: String) : super(message)
 }
 
-internal fun SignedJWT.isVerifiedWith(verificationKeys: () -> List<String>) =
-    verificationKeys().find { isVerifiedWith(it) } != null
-
-private fun SignedJWT.isVerifiedWith(secretKey: String): Boolean = try {
-    verify(MACVerifier(secretKey)) && notExpired()
-} catch (e: JOSEException) {
-    throw JwtVerificationException("JWT signature verification failed", e)
-} catch (e: ParseException) {
-    throw JwtVerificationException("JWT signature verification failed", e)
-}
-
-@Throws(ParseException::class)
-private fun SignedJWT.notExpired(): Boolean {
-    val expiryDate = jwtClaimsSet.expirationTime.toInstant()
-    if (!expiryDate.isAfter(Instant.now())) {
-        throw JwtVerificationException("JWT is expired")
-    }
-    return true
-}
