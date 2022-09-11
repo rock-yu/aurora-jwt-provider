@@ -69,7 +69,7 @@ test {
     useJUnitPlatform()
 }
 
-apply from: "${rootDir}/build-support/quality.gradle"
+apply from: "${rootDir}/config/quality.gradle"
 
 apply plugin: 'maven-publish'
 
