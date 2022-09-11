@@ -6,9 +6,16 @@ data class SecurityContext(
     val authorization: Authorization
 )
 
-data class Identity(val userId: String, val organizationId: String)
+data class Identity(
+    val userId: String,
+    val organizationId: String
+)
 
-data class Preferences(val locale: String?, val timezone: String?, val fileEncoding: String?)
+data class Preferences(
+    val locale: String?,
+    val timezone: String?,
+    val fileEncoding: String?
+)
 
 class Authorization(
     val organizationAssets: List<Int>,
@@ -17,10 +24,8 @@ class Authorization(
     fun hasOrganizationWideAsset(assetId: Int) = organizationAssets.contains(assetId)
 
     fun isGrantedAssetForProject(projectId: String, assetId: Int): Boolean {
-        return if (notAuthorizedForProject(projectId)) {
+        return if (projectAssets.containsKey(projectId).not()) {
             false
         } else projectAssets[projectId]!!.contains(assetId)
     }
-
-    fun notAuthorizedForProject(projectId: String): Boolean = projectAssets.containsKey(projectId).not()
 }
